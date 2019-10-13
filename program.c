@@ -4,7 +4,7 @@ Make all of your changes to main.c instead.
 */
 
 #include "program.h"
-
+#include <sys/mman.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,11 +25,11 @@ static int compare_bytes( const void *pa, const void *pb )
 
 void access_pattern1( char *data, int length )
 {
-	for (int i = 0; i < length; i++)
-	{
+	// TODO: Implementar
+	for (int i = 0; i < length; i++) {
 		data[i] = 0;
 	}
-	// TODO: Implementar
+
 }
 
 void access_pattern2( char *data, int length )

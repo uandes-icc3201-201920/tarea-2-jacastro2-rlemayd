@@ -39,19 +39,19 @@ void FIFO( struct page_table *pt, int page);
 
 void page_fault_handler( struct page_table *pt, int page)
 {
-	printf("page fault on page #%d\n",page);
+	printf("\npage fault on page #%d",page);
 	if(strcmp(algoritmo,"rand")==0)
 	{
-		printf("ejecutar rand");
+		//printf("\nejecutar rand");
 		reemplazo_rand(pt,page);
 	}
 	else if (strcmp(algoritmo,"FIFO"))
 	{
-		printf("ejecutar FIFO");
+		//printf("\nejecutar FIFO");
 	}
 	else
 	{
-		printf("ingrese un algoritmo valido, programa abortado");
+		printf("\ningrese un algoritmo valido, programa abortado");
 		exit(1);
 	}
 }
@@ -59,7 +59,7 @@ void page_fault_handler( struct page_table *pt, int page)
 int main( int argc, char *argv[] )
 {
 	if(argc!=5) {
-		printf("use: virtmem <npages> <nframes> <lru|fifo> <access pattern>\n");
+		printf("\nuse: virtmem <npages> <nframes> <lru|fifo> <access pattern>\n");
 		return 1;
 	}
 	
@@ -113,11 +113,11 @@ void reemplazo_rand( struct page_table *pt, int page)
 	//obtenemos el marco y los bits por la funcion entregada en el enunciado
 	int frame,bits;
 	page_table_get_entry(pt,page,&frame,&bits);
-	printf("\nframe:%d\nbits:%d",frame,bits);
+	//printf("\nframe:%d\nbits:%d",frame,bits);
 		
 	if(bits==0)//si los bits son 0 la pagina no esta cargada en memoria, por ende tendremos que cargarla
 	{
-		printf("pagina no cargada en memoria");
+		printf("\npagina no cargada en memoria");
 		srand(time(0));
 		int randframe = (rand() % nframes);//frame al azar al cual se le borrara su pagina
 		int disponible = -1;//variable por la cual veremos si hay algun frame disponible
@@ -132,10 +132,10 @@ void reemplazo_rand( struct page_table *pt, int page)
 		
 		if(disponible == -1)//si no hay frames disponibles
 		{
-			printf("no hay frames disponibles");
+			printf("\nno hay frames disponibles");
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			
-			//procedemos a borrar las pagina random
+			//procedemos a sobreescribir las pagina random
 			if(marcos[randframe].bit & PROT_WRITE)// si el frame tiene un bit de escritura, escribimos al disco
 			{
 				disk_write(disk, marcos[randframe].numero, &physmem[randframe*PAGE_SIZE]);
@@ -148,7 +148,8 @@ void reemplazo_rand( struct page_table *pt, int page)
 		}
 		else
 		{
-			printf("frame disponible");
+			printf("\nframe disponible");
+			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			disk_read(disk,page, &physmem[disponible*PAGE_SIZE]);//leemos del disco al marco disponible
 			marcos[disponible].bit=bits;//ponemos el bit del marco random igual que la variable bits
 			marcos[disponible].numero = page;
@@ -159,7 +160,7 @@ void reemplazo_rand( struct page_table *pt, int page)
 	}
 	else if(bits != 0)//pagina cargada en memoria
 	{
-		printf("pagina ya cargada en memoria");
+		printf("\npagina ya cargada en memoria");
 		//si la pagina ya esta cargada, significa que ahora se requiere de operaicones de escritura
 		bits = PROT_READ | PROT_WRITE;//le damos permisos de lectura y escritura
 		//utilizamos de indice para el array de marcos el mismo frame entregado y actualizamos los valores
@@ -172,7 +173,25 @@ void reemplazo_rand( struct page_table *pt, int page)
 //algoritmo FIFO
 void FIFO( struct page_table *pt, int page)
 {
+	//obtenemos el marco y los bits por la funcion entregada en el enunciado
+	int frame,bits;
+	page_table_get_entry(pt,page,&frame,&bits);
+	//printf("\nframe:%d\nbits:%d",frame,bits);
 	
+	if(bits==0)//si los bits son 0 la pagina no esta cargada en memoria, por ende tendremos que cargarla
+	{
+	
+	}
+	else if(bits != 0)//pagina cargada en memoria
+	{
+		printf("\npagina ya cargada en memoria");
+		//si la pagina ya esta cargada, significa que ahora se requiere de operaicones de escritura
+		bits = PROT_READ | PROT_WRITE;//le damos permisos de lectura y escritura
+		//utilizamos de indice para el array de marcos el mismo frame entregado y actualizamos los valores
+		marcos[frame].numero = page;
+		marcos[frame].bit = bits;
+		page_table_set_entry(pt,page,frame,bits);
+	}
 }
 
 
