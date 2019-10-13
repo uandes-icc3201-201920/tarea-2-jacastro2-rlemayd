@@ -15,6 +15,15 @@ how to use the page table and disk interfaces.
 #include <string.h>
 #include <errno.h>
 
+typedef struct
+{
+	int bits;
+	int page;
+}entrada_tabla_marco;
+
+entrada_tabla_marco* tabla_de_marco = NULL;
+
+
 void page_fault_handler( struct page_table *pt, int page )
 {
 	printf("page fault on page #%d\n",page);
@@ -30,7 +39,17 @@ int main( int argc, char *argv[] )
 
 	int npages = atoi(argv[1]);
 	int nframes = atoi(argv[2]);
+	alg_reemplazo_pagina = argv[3];
 	const char *program = argv[4];
+
+
+	// Crear la tabla de marcos
+	tabla_de_marco = malloc(nframes * sizeof(entrada_tabla_marco));
+	if (tabla_de_marco == NULL)
+	{
+	    printf("Error allocating space for frame table!\n");
+	    exit(1);
+	}
 
 	struct disk *disk = disk_open("myvirtualdisk",npages);
 	if(!disk) {
@@ -59,10 +78,10 @@ int main( int argc, char *argv[] )
 		access_pattern3(virtmem,npages*PAGE_SIZE);
 
 	} else {
-		fprintf(stderr,"unknown program: %s\n",argv[3]);
-
+		fprintf(stderr,"unknown program: %s\n",argv[4]);
 	}
 
+	free(tabla_de_marco);
 	page_table_delete(pt);
 	disk_close(disk);
 
