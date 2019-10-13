@@ -31,6 +31,7 @@ typedef struct
 
 //lista de marcos
 marco* marcos;
+int *queue;
 
 //declaro la funcion reemplazo_rand para la funcion page_fault_handler, esta funcion sera definida al final del codigo
 void reemplazo_rand( struct page_table *pt, int page);
@@ -48,6 +49,7 @@ void page_fault_handler( struct page_table *pt, int page)
 	else if (strcmp(algoritmo,"FIFO"))
 	{
 		//printf("\nejecutar FIFO");
+		FIFO(pt,page);
 	}
 	else
 	{
@@ -69,7 +71,7 @@ int main( int argc, char *argv[] )
 	algoritmo = argv[3];
 	
 	marcos = malloc(nframes*sizeof(marco));
-	int queue[nframes];
+	queue = malloc(nframes*sizeof(int));
 
 	disk = disk_open("myvirtualdisk",npages);
 	if(!disk) {
@@ -196,22 +198,31 @@ void FIFO( struct page_table *pt, int page)
 		{
 			printf("\nno hay frames disponibles");
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
-			framefifo = queue[head];
+			int framefifo = queue[head];
 			//procedemos a sobreescribir las pagina random:
-			disk_write(disk, marcos[randframe].numero, &physmem[randframe*PAGE_SIZE]);//escribimos lo que este en la pagina al disco
+			disk_write(disk, marcos[framefifo].numero, &physmem[framefifo*PAGE_SIZE]);//escribimos lo que este en la pagina al disco
 			head++; //aumentamos el valor del head
 			head = head%nframes;//usamos el modulo de la cantidad de marcos por si se recorre el array completo
-			disk_read(disk,page, &physmem[disponible*PAGE_SIZE]);//leemos del disco al marco disponible
-			queue[tail] = framefifo;
-			tail++;
-			tail = tail%nframes;
-			
+			disk_read(disk,page, &physmem[framefifo*PAGE_SIZE]);//leemos del disco al marco disponible
+			queue[tail] = framefifo;//hacemos que el frame escogido sea el elemento numero 'tail' de la queue
+			tail++;//aumentamos el numero de la tail
+			tail = tail%nframes;//hacemos la operacion modulo por si recorremos toda la lista
+			marcos[framefifo].numero = page;//actualizamos el numero de pagina del marco
+			marcos[framefifo].bit = bits;//actualizamos el bit del marco
+			page_table_set_entry(pt,page,framefifo,bits);//seteamos una entry en la tabla de paginas
 		}
 		else
 		{
 			printf("\nframe disponible");
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
-			
+			int framefifo = disponible;//el marco sera el disponible encontrado
+			disk_read(disk,page, &physmem[framefifo*PAGE_SIZE]);//leemos del disco al marco disponible
+			queue[tail] = framefifo;//hacemos que el frame escogido sea el elemento numero 'tail' de la queue
+			tail++;//aumentamos el numero de la tail
+			tail = tail%nframes;//hacemos la operacion modulo por si recorremos toda la lista
+			marcos[framefifo].numero = page;//actualizamos el numero de pagina del marco
+			marcos[framefifo].bit = bits;//actualizamos el bit del marco
+			page_table_set_entry(pt,page,framefifo,bits);//seteamos una entry en la tabla de paginas
 		}
 	}
 	else if(bits != 0)//pagina cargada en memoria
