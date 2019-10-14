@@ -42,7 +42,24 @@ void access_pattern2( char *data, int length ) //random
 	// TODO: Implementar
 }
 
-void access_pattern3( char *cdata, int length ) //reunion
+void access_pattern3( char *data, int length ) //random seguido por 5 nmeros
 {
+	long valorrand = lrand48()%length;
+	int contador=0;
+	for(int i = 0;i<length;i++)
+	{
+		if (contador==4)
+		{
+			valorrand = lrand48()%length;
+			contador=0;
+		}
+		else
+		{
+			valorrand++;
+			contador++;
+		}
+		
+		data[valorrand] = 0;
+	}
 	// TODO: Implementar
 }
