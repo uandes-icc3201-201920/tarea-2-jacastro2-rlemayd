@@ -56,6 +56,7 @@ void access_pattern3( char *data, int length ) //random seguido por 5 nmeros
 		else
 		{
 			valorrand++;
+			valorrand = valorrand%length;
 			contador++;
 		}
 		
