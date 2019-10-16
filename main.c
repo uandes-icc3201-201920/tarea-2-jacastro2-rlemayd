@@ -164,6 +164,8 @@ void reemplazo_rand( struct page_table *pt, int page)
 			//procedemos a sobreescribir las pagina random
 			disk_write(disk, marcos[randframe].numero, &physmem[randframe*PAGE_SIZE]);//escribimos lo que este en la pagina al disco
 			cantidad_escritura_en_disco++;
+			page_table_set_entry(pt, marcos[disponible].numero, randframe, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
+			marcos[disponible].bit = 0;//reflejamos estos cambios en la lista de marcos
 			marcos[randframe].bit=bits;//ponemos el bit del marco random igual que la variable bits
 			marcos[randframe].numero = page;
 			//sobreescribimos la nueva pagina con los respectivos parametros
@@ -177,6 +179,8 @@ void reemplazo_rand( struct page_table *pt, int page)
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			disk_read(disk,page, &physmem[disponible*PAGE_SIZE]);//leemos del disco al marco disponible
 			cantidad_lectura_de_disco++;
+			page_table_set_entry(pt, marcos[disponible].numero, randframe, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
+			marcos[disponible].bit = 0;//reflejamos estos cambios en la lista de marcos
 			marcos[disponible].bit=bits;//ponemos el bit del marco random igual que la variable bits
 			marcos[disponible].numero = page;
 			//sobreescribimos la nueva pagina con los respectivos parametros
@@ -229,6 +233,8 @@ void FIFO( struct page_table *pt, int page)
 			//procedemos a sobreescribir las pagina random:
 			disk_write(disk, marcos[framefifo].numero, &physmem[framefifo*PAGE_SIZE]);//escribimos lo que este en la pagina al disco
 			cantidad_escritura_en_disco++;
+			page_table_set_entry(pt, marcos[framefifo].numero, framefifo, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
+			marcos[framefifo].bit = 0;//reflejamos estos cambios en la lista de marcos
 			head++; //aumentamos el valor del head
 			head = head%nframes;//usamos el modulo de la cantidad de marcos por si se recorre el array completo
 			disk_read(disk,page, &physmem[framefifo*PAGE_SIZE]);//leemos del disco al marco disponible
@@ -247,6 +253,8 @@ void FIFO( struct page_table *pt, int page)
 			int framefifo = disponible;//el marco sera el disponible encontrado
 			disk_read(disk,page, &physmem[framefifo*PAGE_SIZE]);//leemos del disco al marco disponible
 			cantidad_lectura_de_disco++;
+			page_table_set_entry(pt, marcos[framefifo].numero, framefifo, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
+			marcos[framefifo].bit = 0;//reflejamos estos cambios en la lista de marcos
 			queue[tail] = framefifo;//hacemos que el frame escogido sea el elemento numero 'tail' de la queue
 			tail++;//aumentamos el numero de la tail
 			tail = tail%nframes;//hacemos la operacion modulo por si recorremos toda la lista
