@@ -36,6 +36,7 @@ typedef struct
 
 //lista de marcos
 marco* marcos;
+//arreglo auxiliar para el fifo
 int *queue;
 
 //declaro la funcion reemplazo_rand para la funcion page_fault_handler, esta funcion sera definida al final del codigo
@@ -46,7 +47,7 @@ void FIFO( struct page_table *pt, int page);
 void page_fault_handler( struct page_table *pt, int page)
 {
 	cantidad_falta_de_paginas++;
-	printf("\npage fault on page #%d",page);
+	//printf("\npage fault on page #%d",page);
 	if(strcmp(algoritmo,"rand")==0)
 	{
 		//printf("\nejecutar rand");
@@ -64,6 +65,17 @@ void page_fault_handler( struct page_table *pt, int page)
 	}
 }
 
+void resumen(const char* alg,const char* prog, int pages, int frames)
+{
+	printf("algoritmo utilizado: %s\n",alg);
+	printf("programa de acceso a memoria utilizado: %s\n",prog);
+	printf("sumario del programa:\n");
+	printf(" _______________________________________________________________________\n");
+	printf("|Nºpags\t|Nºframes\t|Nºfaltas\t|Nºlecturas\t|Nºescrituras\t|\n");
+	printf("|%d\t|%d\t\t|%d\t\t|%d\t\t|%d\t\t|\n",pages,frames,cantidad_falta_de_paginas,cantidad_lectura_de_disco,cantidad_escritura_en_disco);
+	printf(" -----------------------------------------------------------------------\n");
+}
+
 int main( int argc, char *argv[] )
 {
 	if(argc!=5) {
@@ -76,8 +88,8 @@ int main( int argc, char *argv[] )
 	const char *program = argv[4];
 	algoritmo = argv[3];
 	
-	marcos = malloc(nframes*sizeof(marco));
-	queue = malloc(nframes*sizeof(int));
+	marcos = malloc(nframes*sizeof(marco));//definimos el espacio que tomara el arreglo de marcos
+	queue = malloc(nframes*sizeof(int));//definimos el espacio que tomara el arreglo auxiliar
 
 	disk = disk_open("myvirtualdisk",npages);
 	if(!disk) {
@@ -112,11 +124,11 @@ int main( int argc, char *argv[] )
 
 	page_table_delete(pt);
 	disk_close(disk);
-	free(marcos);
+	
+	free(marcos);//liberamos el arreglo de marcos
+	free(queue);
 
-	printf("Cantidad de falta de paginas: %d\n", cantidad_falta_de_paginas);
-	printf("Cantidad de lecturas a disco: %d\n", cantidad_lectura_de_disco);
-	printf("Cantidad de escrituras a disco: %d\n", cantidad_escritura_en_disco);
+	resumen(algoritmo, program, npages, nframes);
 	
 	return 0;
 }
@@ -131,7 +143,7 @@ void reemplazo_rand( struct page_table *pt, int page)
 		
 	if(bits==0)//si los bits son 0 la pagina no esta cargada en memoria, por ende tendremos que cargarla
 	{
-		printf("\npagina no cargada en memoria");
+		//printf("\npagina no cargada en memoria");
 		srand(time(0));
 		int randframe = (rand() % nframes);//frame al azar al cual se le borrara su pagina
 		int disponible = -1;//variable por la cual veremos si hay algun frame disponible
@@ -146,7 +158,7 @@ void reemplazo_rand( struct page_table *pt, int page)
 		
 		if(disponible == -1)//si no hay frames disponibles
 		{
-			printf("\nno hay frames disponibles");
+			//printf("\nno hay frames disponibles");
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			
 			//procedemos a sobreescribir las pagina random
@@ -161,7 +173,7 @@ void reemplazo_rand( struct page_table *pt, int page)
 		}
 		else
 		{
-			printf("\nframe disponible");
+			//printf("\nframe disponible");
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			disk_read(disk,page, &physmem[disponible*PAGE_SIZE]);//leemos del disco al marco disponible
 			cantidad_lectura_de_disco++;
@@ -174,7 +186,7 @@ void reemplazo_rand( struct page_table *pt, int page)
 	}
 	else if(bits != 0)//pagina cargada en memoria
 	{
-		printf("\npagina ya cargada en memoria");
+		//printf("\npagina ya cargada en memoria");
 		//si la pagina ya esta cargada, significa que ahora se requiere de operaicones de escritura
 		bits = PROT_READ | PROT_WRITE;//le damos permisos de lectura y escritura
 		//utilizamos de indice para el array de marcos el mismo frame entregado y actualizamos los valores
@@ -185,8 +197,9 @@ void reemplazo_rand( struct page_table *pt, int page)
 }
 
 //para una estructura fifo conviene definir el primer y ultimo elemento en orden de llegada
-int head = 0;//head sera el indice del ultimo dato ingresado primero
+int head = 0;//head sera el indice del ultimo dato ingresado
 int tail = 0;//tail sera el indice del primer dato ingresado
+//junto a esto se define un arreglo auxiliar para el fifo
 
 //algoritmo FIFO
 void FIFO( struct page_table *pt, int page)
@@ -198,7 +211,7 @@ void FIFO( struct page_table *pt, int page)
 	
 	if(bits==0)//si los bits son 0 la pagina no esta cargada en memoria, por ende tendremos que cargarla
 	{
-		printf("\npagina no cargada en memoria");
+		//printf("\npagina no cargada en memoria");
 		int disponible = -1;//variable por la cual veremos si hay algun frame disponible
 		for(int i = 0; i<nframes; i++)//recorremos los marcos
 		{
@@ -210,7 +223,7 @@ void FIFO( struct page_table *pt, int page)
 		}
 		if(disponible == -1)//si no hay frames disponibles
 		{
-			printf("\nno hay frames disponibles");
+			//printf("\nno hay frames disponibles");
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			int framefifo = queue[head];
 			//procedemos a sobreescribir las pagina random:
@@ -229,7 +242,7 @@ void FIFO( struct page_table *pt, int page)
 		}
 		else
 		{
-			printf("\nframe disponible");
+			//printf("\nframe disponible");
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			int framefifo = disponible;//el marco sera el disponible encontrado
 			disk_read(disk,page, &physmem[framefifo*PAGE_SIZE]);//leemos del disco al marco disponible
@@ -244,7 +257,7 @@ void FIFO( struct page_table *pt, int page)
 	}
 	else if(bits != 0)//pagina cargada en memoria
 	{
-		printf("\npagina ya cargada en memoria");
+		//printf("\npagina ya cargada en memoria");
 		//si la pagina ya esta cargada, significa que ahora se requiere de operaicones de escritura
 		bits = PROT_READ | PROT_WRITE;//le damos permisos de lectura y escritura
 		//utilizamos de indice para el array de marcos el mismo frame entregado y actualizamos los valores
