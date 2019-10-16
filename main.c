@@ -151,11 +151,7 @@ void reemplazo_rand( struct page_table *pt, int page)
 			
 			//procedemos a sobreescribir las pagina random
 			disk_write(disk, marcos[randframe].numero, &physmem[randframe*PAGE_SIZE]);//escribimos lo que este en la pagina al disco
-			if(marcos[randframe].bit & PROT_WRITE)// si el frame tiene un bit de escritura, escribimos al disco
-			{
-				disk_write(disk, marcos[randframe].numero, &physmem[randframe*PAGE_SIZE]);
-				cantidad_escritura_en_disco++;
-			}
+			cantidad_escritura_en_disco++;
 			marcos[randframe].bit=bits;//ponemos el bit del marco random igual que la variable bits
 			marcos[randframe].numero = page;
 			//sobreescribimos la nueva pagina con los respectivos parametros
