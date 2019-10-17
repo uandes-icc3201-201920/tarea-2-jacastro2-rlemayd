@@ -171,8 +171,6 @@ void reemplazo_rand( struct page_table *pt, int page)
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			disk_read(disk,page, &physmem[disponible*PAGE_SIZE]);//leemos del disco al marco disponible
 			cantidad_lectura_de_disco++;
-			page_table_set_entry(pt, marcos[disponible].numero, disponible, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
-			marcos[disponible].bit = 0;//reflejamos estos cambios en la lista de marcos
 			marcos[disponible].bit=bits;//ponemos el bit del marco random igual que la variable bits
 			marcos[disponible].numero = page;
 			//sobreescribimos la nueva pagina con los respectivos parametros
@@ -245,8 +243,6 @@ void FIFO( struct page_table *pt, int page)
 			int framefifo = disponible;//el marco sera el disponible encontrado
 			disk_read(disk,page, &physmem[framefifo*PAGE_SIZE]);//leemos del disco al marco disponible
 			cantidad_lectura_de_disco++;
-			page_table_set_entry(pt, marcos[framefifo].numero, framefifo, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
-			marcos[framefifo].bit = 0;//reflejamos estos cambios en la lista de marcos
 			queue[tail] = framefifo;//hacemos que el frame escogido sea el elemento numero 'tail' de la queue
 			tail++;//aumentamos el numero de la tail
 			tail = tail%nframes;//hacemos la operacion modulo por si recorremos toda la lista
