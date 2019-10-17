@@ -1,11 +1,3 @@
-/*
-Main program for the virtual memory project.
-Make all of your modifications to this file.
-You may add or rearrange any code or data as you need.
-The header files page_table.h and disk.h explain
-how to use the page table and disk interfaces.
-*/
-
 #include "page_table.h"
 #include "disk.h"
 #include "program.h"
@@ -164,8 +156,8 @@ void reemplazo_rand( struct page_table *pt, int page)
 			//procedemos a sobreescribir las pagina random
 			disk_write(disk, marcos[randframe].numero, &physmem[randframe*PAGE_SIZE]);//escribimos lo que este en la pagina al disco
 			cantidad_escritura_en_disco++;
-			page_table_set_entry(pt, marcos[disponible].numero, randframe, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
-			marcos[disponible].bit = 0;//reflejamos estos cambios en la lista de marcos
+			page_table_set_entry(pt, marcos[randframe].numero, randframe, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
+			marcos[randframe].bit = 0;//reflejamos estos cambios en la lista de marcos
 			marcos[randframe].bit=bits;//ponemos el bit del marco random igual que la variable bits
 			marcos[randframe].numero = page;
 			//sobreescribimos la nueva pagina con los respectivos parametros
@@ -179,7 +171,7 @@ void reemplazo_rand( struct page_table *pt, int page)
 			bits = PROT_READ;//el marco tendra bits de proteccion de lectura
 			disk_read(disk,page, &physmem[disponible*PAGE_SIZE]);//leemos del disco al marco disponible
 			cantidad_lectura_de_disco++;
-			page_table_set_entry(pt, marcos[disponible].numero, randframe, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
+			page_table_set_entry(pt, marcos[disponible].numero, disponible, 0);//hacemos un update a la tabla de paginas, dejando "la pagina en blanco"
 			marcos[disponible].bit = 0;//reflejamos estos cambios en la lista de marcos
 			marcos[disponible].bit=bits;//ponemos el bit del marco random igual que la variable bits
 			marcos[disponible].numero = page;
