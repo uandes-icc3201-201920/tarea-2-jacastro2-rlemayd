@@ -8,13 +8,12 @@ Make all of your changes to main.c instead.
 #include <stdio.h>
 #include <stdlib.h>
 
-void access_pattern1( char *data, int length ) //sequencial
+void access_pattern1( char *data, int length ) //secuencial
 {
 	for (int i = 0; i < length; i++)
 	{
 		data[i] = 0;
 	}
-	// TODO: Implementar
 }
 
 void access_pattern2( char *data, int length ) //random
@@ -24,10 +23,9 @@ void access_pattern2( char *data, int length ) //random
 		long valor = lrand48()%length;
 		data[valor] = 0;
 	}
-	// TODO: Implementar
 }
 
-void access_pattern3( char *data, int length ) //random seguido por 5 nmeros
+void access_pattern3( char *data, int length ) //random seguido por 5 números
 {
 	long valorrand = lrand48()%length;
 	int contador=0;
@@ -47,5 +45,4 @@ void access_pattern3( char *data, int length ) //random seguido por 5 nmeros
 		
 		data[valorrand] = 0;
 	}
-	// TODO: Implementar
 }
